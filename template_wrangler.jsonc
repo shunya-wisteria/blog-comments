@@ -1,0 +1,23 @@
+/**
+ * Please replace id at kv_namespaces for your own ids and save as "wrangler.jsonc" to execute.
+ *  
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "blog-comments",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-04-20",
+	"observability": {
+		"enabled": true
+	},
+
+	"kv_namespaces": [
+		{
+			"binding": "BLOG_COM_KV",
+			"id": "XXXXXXXXXXXXXXXXXXX",
+			"preview_id": "XXXXXXXXXXXXXXXXXXX"
+		}
+	]
+}
