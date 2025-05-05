@@ -1,0 +1,70 @@
+openapi: 3.0.0
+info:
+  title: Comment API
+  description: Cloudflare Workersを利用したコメント管理API
+  version: 1.0.0
+servers:
+  - url: https://hello.swisteria.workers.dev
+  - url: https://blog-comments.swisteria.workers.dev
+paths:
+  /:
+    get:
+      summary: 特定のエントリIDのコメントを取得
+      parameters:
+        - name: entry
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: コメント取得成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  code:
+                    type: string
+                  resData:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        comment:
+                          type: string
+                        entryId:
+                          type: string
+        "400":
+          description: 無効なリクエスト
+        "500":
+          description: サーバーエラー
+
+    post:
+      summary: 新しいコメントを登録
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                mail:
+                  type: string
+                comment:
+                  type: string
+                entryId:
+                  type: string
+      responses:
+        "200":
+          description: コメント登録成功
+        "400":
+          description: 無効なリクエスト
+        "500":
+          description: サーバーエラー
