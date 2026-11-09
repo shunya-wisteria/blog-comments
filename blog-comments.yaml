@@ -48,7 +48,11 @@ paths:
                               type: string
                               format: date-time
         "400":
-          description: 無効なリクエスト
+          description: entryパラメータが指定されていない、または空の場合
+        "404":
+          description: ルートパス以外へのリクエスト
+        "405":
+          description: サポートされていないHTTPメソッド
         "500":
           description: サーバーエラー
 
@@ -63,8 +67,6 @@ paths:
               properties:
                 name:
                   type: string
-                mail:
-                  type: string
                 comment:
                   type: string
                 entryId:
@@ -73,6 +75,18 @@ paths:
         "200":
           description: コメント登録成功
         "400":
-          description: 無効なリクエスト
+          description: name、comment、entryIdのいずれかが指定されていない、または空の場合
+        "404":
+          description: ルートパス以外へのリクエスト
+        "405":
+          description: サポートされていないHTTPメソッド
         "500":
-          description: サーバーエラー
+          description: Discord Webhookへの送信に失敗した場合
+
+    options:
+      summary: CORSプリフライトリクエスト
+      responses:
+        "200":
+          description: プリフライトリクエスト成功
+        "404":
+          description: ルートパス以外へのリクエスト

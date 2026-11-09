@@ -15,6 +15,7 @@ export interface ReqBody{
 export default {
   async fetch(request, env:Env, ctx): Promise<Response> {
     let res = {}
+    let httpStatus = 200;
 
     // ルートパス以外は404を返す
     const reqUrl = new URL(request.url);
@@ -36,7 +37,7 @@ export default {
     // OPTIONSメソッドの場合は、CORS対応のために200を返す
 		if (request.method === 'OPTIONS') {
 			return new Response(null, {
-				status: 200,
+				status: httpStatus,
 				headers: {
 					"Access-Control-Allow-Origin": "*",
 					"Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
@@ -62,32 +63,62 @@ export default {
       });
     }
 
+    // ------------------------
     // コメント取得
+    // ------------------------
     if (request.method == "GET") {
       // クエリパラメータ取得
       const params = reqUrl.searchParams;
       const entryId = params.get("entry");
 
-      if (entryId?.toString() != null) {
-        const response = await env.BLOG_COM_KV.get(entryId?.toString());
+      // entryIdがnullまたは空文字の場合は、400を返す
+      if (entryId == null || entryId == "") {
+        httpStatus = 400;
         res = {
-          status: "S",
-          code: "0000",
-          msg: "success",
-          res: {
-            entryId: entryId,
-            comments: response != null ? JSON.parse(response) : null
-          }
+          status: "E",
+          code: "4000",
+          msg: "Bad Request"
+        }
+        return new Response(JSON.stringify(res), {status: httpStatus, headers:{
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+          "Content-Type": "application/json; charset=utf-8"
+        }});
+      }
+
+      // entryIdがnullでない場合は、KVからコメントを取得する
+      const response = await env.BLOG_COM_KV.get(entryId?.toString());
+      res = {
+        status: "S",
+        code: "0000",
+        msg: "success",
+        res: {
+          entryId: entryId,
+          comments: response != null ? JSON.parse(response) : null
         }
       }
     }
 
+    // ------------------------
     // コメント登録
+    // ------------------------
     else if(request.method == "POST")
     {
       const reqBody:ReqBody = await request.json();
 
-      			// コメント配列
+      // リクエストbodyのバリデーション
+      if(reqBody.name == null || reqBody.name == "" || reqBody.comment == null || reqBody.comment == "" || reqBody.entryId == null || reqBody.entryId == "")
+      {
+        res = {status : "E", code : "4000", msg:"Bad Request", resData : reqBody};
+        httpStatus = 400;
+        return new Response(JSON.stringify(res), {status: httpStatus, headers:{
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+          "Content-Type": "application/json; charset=utf-8"
+        }});
+      }
+
+      // コメント配列
 			let comments = [];
 
 			// 登録済みコメント取得
@@ -125,19 +156,19 @@ export default {
       const response = await fetch(url, init);
       if(response.status > 299)
       {
-        res = {status : "E", code : "9001", resData : init};
-        return new Response(JSON.stringify(res), {headers:{
+        httpStatus = 500;
+        res = {status : "E", code : "9001", msg: "Internal Server Error", resData : init};
+        return new Response(JSON.stringify(res), {status: httpStatus, headers:{
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
           "Content-Type": "application/json; charset=utf-8"
         }});
       }
 
-      res = {status : "S", code : "0000", resData : init};
-
+      res = {status : "S", code : "0000", msg: "success", resData : init};
     }
 
-    return new Response(JSON.stringify(res), {headers:{
+    return new Response(JSON.stringify(res), {status: httpStatus, headers:{
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
       "Content-Type": "application/json; charset=utf-8"
