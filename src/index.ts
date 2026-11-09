@@ -16,6 +16,7 @@ export default {
   async fetch(request, env:Env, ctx): Promise<Response> {
     let res = {}
 
+    // ルートパス以外は404を返す
     const reqUrl = new URL(request.url);
     if (reqUrl.pathname !== "/") {
       return new Response(JSON.stringify({
@@ -24,6 +25,35 @@ export default {
         msg: "Not Found"
       }), {
         status: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+          "Content-Type": "application/json; charset=utf-8"
+        }
+      });
+    }
+
+    // OPTIONSメソッドの場合は、CORS対応のために200を返す
+		if (request.method === 'OPTIONS') {
+			return new Response(null, {
+				status: 200,
+				headers: {
+					"Access-Control-Allow-Origin": "*",
+					"Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+					"Access-Control-Allow-Headers": "Content-Type",
+					"Content-Type": "application/json; charset=utf-8"
+				}
+			});
+		}
+    // GET, POST以外のメソッドは405を返す
+    else if(request.method !== "GET" && request.method !== "POST")
+    {
+      return new Response(JSON.stringify({
+        status: "E",
+        code: "4050",
+        msg: "Method Not Allowed"
+      }), {
+        status: 405,
         headers: {
           "Access-Control-Allow-Origin": "*",
           "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
