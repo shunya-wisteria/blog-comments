@@ -16,10 +16,25 @@ export default {
   async fetch(request, env:Env, ctx): Promise<Response> {
     let res = {}
 
+    const reqUrl = new URL(request.url);
+    if (reqUrl.pathname !== "/") {
+      return new Response(JSON.stringify({
+        status: "E",
+        code: "4040",
+        msg: "Not Found"
+      }), {
+        status: 404,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET,HEAD,POST,OPTIONS",
+          "Content-Type": "application/json; charset=utf-8"
+        }
+      });
+    }
+
     // コメント取得
     if (request.method == "GET") {
       // クエリパラメータ取得
-      const reqUrl = new URL(request.url);
       const params = reqUrl.searchParams;
       const entryId = params.get("entry");
 
